@@ -1,0 +1,7 @@
+services:
+  yfinance-wrapper:
+    build: .
+    container_name: yfinance-wrapper
+    ports:
+      - "7000:7000"
+    restart: unless-stopped
