@@ -34,7 +34,6 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
             "calls": [],
         }
 
-    selected_expiry = expiry or expiries[0]
     chain = t.option_chain(selected_expiry)
 
     info = {}
@@ -94,6 +93,5 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
         "ticker": ticker.upper(),
         "spotPrice": spot,
         "expiries": expiries,
-        "selectedExpiry": selected_expiry,
         "calls": calls,
     }
