@@ -84,7 +84,7 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
                         "openInterest": clean_value(row.get("openInterest")),
                         "impliedVolatility": clean_value(row.get("impliedVolatility")),
                         "inTheMoney": clean_value(row.get("inTheMoney")),
-                        "expiration": selected_expiry,
+                        "expiration": exp,
                     }
                 )
         except Exception:
