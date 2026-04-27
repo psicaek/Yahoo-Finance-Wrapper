@@ -29,18 +29,10 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
     if not expiries:
         return {
             "ticker": ticker.upper(),
-            "spotPrice": spot,
+            "spotPrice": None,
             "expiries": [],
             "calls": [],
         }
-
-    chain = t.option_chain(selected_expiry)
-
-    info = {}
-    try:
-        info = t.fast_info
-    except Exception:
-        info = {}
 
     spot = None
 
@@ -67,11 +59,14 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
             pass
 
     calls = []
-    for exp in expiries:
+
+    expiries_to_process = [expiry] if expiry else expiries
+
+    for exp in expiries_to_process:
         try:
             option_chain = t.option_chain(exp)
 
-            for _, row in chain.calls.iterrows():
+            for _, row in option_chain.calls.iterrows():
                 calls.append(
                     {
                         "contractSymbol": clean_value(row.get("contractSymbol")),
