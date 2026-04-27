@@ -68,21 +68,27 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
             pass
 
     calls = []
-    for _, row in chain.calls.iterrows():
-        calls.append(
-            {
-                "contractSymbol": clean_value(row.get("contractSymbol")),
-                "strike": clean_value(row.get("strike")),
-                "lastPrice": clean_value(row.get("lastPrice")),
-                "bid": clean_value(row.get("bid")),
-                "ask": clean_value(row.get("ask")),
-                "volume": clean_value(row.get("volume")),
-                "openInterest": clean_value(row.get("openInterest")),
-                "impliedVolatility": clean_value(row.get("impliedVolatility")),
-                "inTheMoney": clean_value(row.get("inTheMoney")),
-                "expiration": selected_expiry,
-            }
-        )
+    for exp in expiries:
+        try:
+            option_chain = t.option_chain(exp)
+
+            for _, row in chain.calls.iterrows():
+                calls.append(
+                    {
+                        "contractSymbol": clean_value(row.get("contractSymbol")),
+                        "strike": clean_value(row.get("strike")),
+                        "lastPrice": clean_value(row.get("lastPrice")),
+                        "bid": clean_value(row.get("bid")),
+                        "ask": clean_value(row.get("ask")),
+                        "volume": clean_value(row.get("volume")),
+                        "openInterest": clean_value(row.get("openInterest")),
+                        "impliedVolatility": clean_value(row.get("impliedVolatility")),
+                        "inTheMoney": clean_value(row.get("inTheMoney")),
+                        "expiration": selected_expiry,
+                    }
+                )
+        except Exception:
+            continue
 
     return {
         "ticker": ticker.upper(),
