@@ -43,7 +43,29 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
     except Exception:
         info = {}
 
-    spot = info.get("lastPrice") if isinstance(info, dict) else None
+    spot = None
+
+    try:
+        fast_info = t.fast_info
+        if fast_info:
+            spot = fast_info.get("lastPrice") or fast_info.get("last_price")
+    except Exception:
+        pass
+
+    if spot is None:
+        try:
+            info = t.info or {}
+            spot = info.get("currentPrice") or info.get("regularMarketPrice")
+        except Exception:
+            pass
+
+    if spot is None:
+        try:
+            hist = t.history(period="5d")
+            if hist is not None and not hist.empty:
+                spot = float(hist["Close"].dropna().iloc[-1])
+        except Exception:
+            pass
 
     calls = []
     for _, row in chain.calls.iterrows():
