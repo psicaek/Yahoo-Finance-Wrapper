@@ -29,7 +29,7 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
     if not expiries:
         return {
             "ticker": ticker.upper(),
-            "spotPrice": None,
+            "spotPrice": spot,
             "expiries": [],
             "calls": [],
         }
