@@ -64,58 +64,61 @@ def health():
 
 @app.get("/chain")
 def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
-    t = yf.Ticker(ticker)
+    try:
+        t = yf.Ticker(ticker)
+        expiries = list(t.options or [])
+        if not expiries:
+            return {
+                "ticker": ticker.upper(),
+                "spotPrice": None,
+                "expiries": [],
+                "calls": [],
+            }
 
-    expiries = list(t.options or [])
-    if not expiries:
+        spot = get_spot(t)
+
+        if expiry and expiry not in expiries:
+            expiry = None
+
+        expiries_to_process = [expiry] if expiry else expiries
+        calls = []
+
+        for exp in expiries_to_process:
+            try:
+                option_chain = t.option_chain(exp)
+                for _, row in option_chain.calls.iterrows():
+                    calls.append(
+                        {
+                            "contractSymbol": clean_value(row.get("contractSymbol")),
+                            "strike": clean_value(row.get("strike")),
+                            "lastPrice": clean_value(row.get("lastPrice")),
+                            "bid": clean_value(row.get("bid")),
+                            "ask": clean_value(row.get("ask")),
+                            "volume": clean_value(row.get("volume")),
+                            "openInterest": clean_value(row.get("openInterest")),
+                            "impliedVolatility": clean_value(
+                                row.get("impliedVolatility")
+                            ),
+                            "inTheMoney": (
+                                bool(row.get("inTheMoney"))
+                                if row.get("inTheMoney") is not None
+                                else None
+                            ),
+                            "expiration": exp,
+                        }
+                    )
+            except Exception:
+                continue
+
         return {
             "ticker": ticker.upper(),
-            "spotPrice": None,
-            "expiries": [],
-            "calls": [],
+            "spotPrice": spot,
+            "expiries": expiries,
+            "calls": calls,
         }
 
-    spot = get_spot(t)
-
-    # validate expiry — if provided but not in list, fall back to all
-    if expiry and expiry not in expiries:
-        expiry = None
-
-    expiries_to_process = [expiry] if expiry else expiries
-
-    calls = []
-
-    for exp in expiries_to_process:
-        try:
-            option_chain = t.option_chain(exp)
-            for _, row in option_chain.calls.iterrows():
-                calls.append(
-                    {
-                        "contractSymbol": clean_value(row.get("contractSymbol")),
-                        "strike": clean_value(row.get("strike")),
-                        "lastPrice": clean_value(row.get("lastPrice")),
-                        "bid": clean_value(row.get("bid")),
-                        "ask": clean_value(row.get("ask")),
-                        "volume": clean_value(row.get("volume")),
-                        "openInterest": clean_value(row.get("openInterest")),
-                        "impliedVolatility": clean_value(row.get("impliedVolatility")),
-                        "inTheMoney": (
-                            bool(row.get("inTheMoney"))
-                            if row.get("inTheMoney") is not None
-                            else None
-                        ),
-                        "expiration": exp,
-                    }
-                )
-        except Exception:
-            continue
-
-    return {
-        "ticker": ticker.upper(),
-        "spotPrice": spot,
-        "expiries": expiries,
-        "calls": calls,
-    }
+    except Exception as e:
+        return {"ticker": ticker.upper(), "error": str(e), "detail": repr(e)}
 
 
 # ─────────────────────────────────────────────
