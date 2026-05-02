@@ -66,7 +66,7 @@ def health():
 def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
     t = yf.Ticker(ticker)
 
-    expiries = list(t.options)
+    expiries = list(t.options or [])
     if not expiries:
         return {
             "ticker": ticker.upper(),
@@ -77,8 +77,13 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
 
     spot = get_spot(t)
 
-    calls = []
+    # validate expiry — if provided but not in list, fall back to all
+    if expiry and expiry not in expiries:
+        expiry = None
+
     expiries_to_process = [expiry] if expiry else expiries
+
+    calls = []
 
     for exp in expiries_to_process:
         try:
@@ -94,7 +99,11 @@ def chain(ticker: str = Query(...), expiry: str | None = Query(None)):
                         "volume": clean_value(row.get("volume")),
                         "openInterest": clean_value(row.get("openInterest")),
                         "impliedVolatility": clean_value(row.get("impliedVolatility")),
-                        "inTheMoney": clean_value(row.get("inTheMoney")),
+                        "inTheMoney": (
+                            bool(row.get("inTheMoney"))
+                            if row.get("inTheMoney") is not None
+                            else None
+                        ),
                         "expiration": exp,
                     }
                 )
