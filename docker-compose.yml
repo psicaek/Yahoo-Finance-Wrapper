@@ -12,6 +12,7 @@ services:
       N8N_SECURE_COOKIE: "false"
     volumes:
       - n8n_data:/home/node/.n8n
+      - /home/john/Yahoo-Finance-Wrapper:/home/node/data
     restart: unless-stopped
     networks:
       - appnet
