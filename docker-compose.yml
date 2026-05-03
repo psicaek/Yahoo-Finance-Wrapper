@@ -10,6 +10,7 @@ services:
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
       N8N_RUNNERS_ENABLED: "true"
       N8N_SECURE_COOKIE: "false"
+      N8N_RESTRICT_FILE_ACCESS_TO: /home/node/data;/home/node/.n8n-files
     volumes:
       - n8n_data:/home/node/.n8n
       - /home/john/Yahoo-Finance-Wrapper:/home/node/data
