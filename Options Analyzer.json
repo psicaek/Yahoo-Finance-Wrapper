@@ -1,0 +1,845 @@
+{
+  "name": "Options Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 11,
+              "triggerAtMinute": 30
+            },
+            {
+              "triggerAtHour": 16
+            },
+            {
+              "triggerAtHour": 21,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-160, -448],
+      "id": "01976522-bbae-48ac-a0e1-f9b661eca6e2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [336, 80],
+      "id": "8a9307fb-ce0d-47fd-894c-942bfd70be76",
+      "name": "Wait",
+      "webhookId": "c422a93a-957f-4da8-955b-b6334989a532"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .filter(item => {\n    const days = Number(item.json.daysToExpiry);\n    return days >= 0 && days <= 100;\n  })\n  .map(item => ({ json: item.json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1104, -96],
+      "id": "35296f71-c0d4-42a3-8590-1484adbfe30d",
+      "name": "0-100 days expiry"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .filter(item => {\n    const days = Number(item.json.daysToExpiry);\n    return days > 100 && days <= 365;\n  })\n  .map(item => ({ json: item.json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1104, 80],
+      "id": "8d031d7e-0a2d-4395-9125-aca58f50fb14",
+      "name": "100-365 days of expiry"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .filter(item => {\n    const days = Number(item.json.daysToExpiry);\n    return days > 365 && days <= 900;\n  })\n  .map(item => ({ json: item.json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1104, 256],
+      "id": "2c0959e1-d4f1-49cb-a926-711e62ab0a2b",
+      "name": "365-900 days of expiry"
+    },
+    {
+      "parameters": {
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [2672, 80],
+      "id": "d57e33b0--6d97429c9610",
+      "name": "Send an Email",
+      "webhookId": "e4da2a55-ba58fcf4e829",
+      "credentials": {
+        "smtp": {
+          "id": "HTO2SfEur9a",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/data/nasdaq_screener_1777828390948.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [-352, -208],
+      "id": "150a8404-578d-4c7c-a4c8-2a8b169b082e",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [-176, -208],
+      "id": "27d84864-8675-444e-a100-bb618c1fd3f4",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [2080, -96],
+      "id": "f947be2a-09f4b476bcf5",
+      "name": "Google Gemini Chat Model Gemini 3.0",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hi1794T",
+          "name": "Google GeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [2080, 256],
+      "id": "7c27a111-29ddf5b4a47e",
+      "name": "Google Gemini Chat Model1 gemini 3.1 lite",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hi1794TA",
+          "name": "Google Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [2080, 608],
+      "id": "49f1a3ae--d7685b64c41e",
+      "name": "Google Gemini Chat Model2 gemini2.5 lite",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hi1794TMqw",
+          "name": "Google Gemin) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  json: {\n    ticker: item.json.Symbol,\n    price: item.json[\"Last Sale\"]\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-16, -192],
+      "id": "a103006c-5d06-4b4c-9b1d-b58e6cf10e31",
+      "name": "Step 2 Extract from file"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .map(item => {\n    const rawPrice = String(item.json.price ?? item.json[\"Last Sale\"] ?? \"\").replace(/[$,]/g, \"\");\n    const price = parseFloat(rawPrice);\n\n    return {\n      json: {\n        ticker: item.json.ticker ?? item.json.Symbol,\n        price\n      }\n    };\n  })\n  .filter(item => item.json.ticker && !isNaN(item.json.price) && item.json.price >= 20 && item.json.price <= 45);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [176, -192],
+      "id": "324cdcf6-6e7c-437b-84de-8f7f6f1e5579",
+      "name": "Step 3 Filter by Price"
+    },
+    {
+      "parameters": {
+        "url": "=http://yfinance-wrapper:7000/stockmetrics?tickers={{$json.ticker}}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [-368, 80],
+      "id": "fb7415c4-bc7d-4658-825e-7d17cfc668b1",
+      "name": "Step 5 HTTP Request : Detailed Option Metrics"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst results = [];\n\nfor (const item of all) {\n  // handle both {results: [...]} and flat array\n  const raw = item.json.results || [item.json];\n\n  for (const x of raw) {\n    if (!x.ticker || x.error) continue;\n\n    let score = 0;\n\n    // ── 1. IV RANK (0-30 points) ──────────────────────────────────\n    // Higher IV rank = options more expensive = better premium to sell\n    // Sweet spot: 30-80 (not too low, not at extreme peak)\n    const ivRank = x.ivRank ?? 0;\n    if (ivRank >= 50) score += 30;\n    else if (ivRank >= 30) score += 22;\n    else if (ivRank >= 15) score += 12;\n    else score += 0;\n\n    // ── 2. VRP — IV vs RV (0-25 points) ──────────────────────────\n    // Positive VRP = IV overpriced vs realized moves = sell premium\n    const vrp = x.vrp ?? 0;\n    if (vrp >= 0.15) score += 25;\n    else if (vrp >= 0.08) score += 18;\n    else if (vrp >= 0.03) score += 10;\n    else if (vrp > 0) score += 4;\n    else score += 0; // negative VRP = IV cheap = not ideal for selling\n\n    // ── 3. IV DIRECTION (0-15 points) ────────────────────────────\n    // Rising IV = options getting more expensive = better time to sell\n    if (x.ivDirection === \"rising\") score += 15;\n    else if (x.ivDirection === \"falling\") score += 0;\n\n    // ── 4. PUT/CALL SIGNAL (0-15 points) ─────────────────────────\n    // Bullish put/call = more call activity = stock sentiment positive\n    if (x.putCallSignal === \"bullish\") score += 15;\n    else if (x.putCallSignal === \"neutral\") score += 7;\n    else score += 0; // bearish\n\n    // ── 5. CURRENT IV LEVEL (0-10 points) ────────────────────────\n    // Higher absolute IV = fatter premiums on covered calls\n    const iv = x.ivCurrent ?? 0;\n    if (iv >= 0.60) score += 10;\n    else if (iv >= 0.40) score += 8;\n    else if (iv >= 0.25) score += 5;\n    else if (iv >= 0.15) score += 2;\n    else score += 0;\n\n    // ── 6. LIQUIDITY (0-5 points) ─────────────────────────────────\n    // High call OI = liquid options = tighter spreads = easier to trade\n    const callOI = x.callOI ?? 0;\n    if (callOI >= 100000) score += 5;\n    else if (callOI >= 50000) score += 4;\n    else if (callOI >= 10000) score += 2;\n    else score += 0;\n\n    // clamp 0-100\n    score = Math.max(0, Math.min(100, score));\n\n    results.push({\n      json: {\n        ticker:              x.ticker,\n        price:               x.price,\n        score:               score,\n        ivRank:              x.ivRank,\n        ivCurrent:           x.ivCurrent,\n        ivDirection:         x.ivDirection,\n        ivChange:            x.ivChange,\n        rv30d:               x.rv30d,\n        vrp:                 x.vrp,\n        vrpSignal:           x.vrpSignal,\n        putCallRatioOI:      x.putCallRatioOI,\n        putCallRatioVolume:  x.putCallRatioVolume,\n        putCallSignal:       x.putCallSignal,\n        callOI:              x.callOI,\n        putOI:               x.putOI,\n        callVolume:          x.callVolume,\n        putVolume:           x.putVolume,\n        // human-readable signals\n        signal: (\n          x.vrpSignal === \"sell_premium\" && x.ivDirection === \"rising\"\n            ? \"STRONG_SELL_PREMIUM\"\n            : x.vrpSignal === \"sell_premium\"\n            ? \"SELL_PREMIUM\"\n            : x.ivDirection === \"rising\"\n            ? \"WATCH\"\n            : \"SKIP\"\n        )\n      }\n    });\n  }\n}\n\n// sort highest score first\nresults.sort((a, b) => b.json.score - a.json.score);\n\n// return top 20\nreturn results.slice(0, 10);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-192, 80],
+      "id": "35ca2cd9-23d6-4d6a-8915-9de344d49b56",
+      "name": "Select the top 10 ranked tickers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tickers = $input.all().map(item => item.json.ticker).join(\",\");\n\nreturn [{ json: { tickers } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-16, 80],
+      "id": "dff85b75-042a-4f98-8d19-b3bc0100b644",
+      "name": "Final ticker string (packaging)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tickers = $input.first().json.tickers.split(\",\");\n\nreturn tickers.map(t => ({\n  json: { ticker: t.trim().toUpperCase() }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [176, 80],
+      "id": "65cbe1ec-eea1-4845-85b1-a2d8a65dc79b",
+      "name": "Final ticker preparing for next Api "
+    },
+    {
+      "parameters": {
+        "url": "http://yfinance-wrapper:7000/chain",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ticker",
+              "value": "={{$json.ticker}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [496, 80],
+      "id": "d7e2750f-b04d-474a-8de6-ecd0ed342105",
+      "name": "Step 9 HTTP Request: Options‑chain API"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  const ticker = data.ticker;\n  const spot = Number(data.spotPrice);\n  const calls = data.calls || [];\n  \n\n  if (!spot || !calls.length) {\n    results.push({\n      json: {\n        ticker,\n        reason: \"Missing spot price or no calls returned\",\n        spotPrice: spot,\n        callCount: calls.length\n      }\n    });\n    continue;\n  }\n\n  for (const call of calls) {\n    const strike = Number(call.strike);\n    const bid = Number(call.bid ?? 0);\n    const ask = Number(call.ask ?? 0);\n    const oi = Number(call.openInterest ?? 0);\n    const volume = Number(call.volume ?? 0);\n    const iv = Number(call.impliedVolatility ?? 0);\n\n    if (!strike) continue;\n    if (strike < spot) continue;\n\n    const premium = ask || bid || 0;\n    if (premium <= 0) continue;\n\n    const premiumYield = premium / spot;\n    const upsidePct = (strike - spot) / spot;\n    const totalIfCalled = premiumYield + upsidePct;\n    const spreadPct = (ask > 0 && bid > 0) ? ((ask - bid) / ask) : null;\n\n    results.push({\n      json: {\n        ticker,\n        expir: call.expiration || null,\n        spotPrice: spot,\n        strike,\n        bid,\n        ask,\n        premium,\n        premiumYield,\n        upsidePct,\n        totalIfCalled,\n        openInterest: oi,\n        volume,\n        impliedVolatility: iv,\n        spreadPct\n      }\n    });\n  }\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [704, 80],
+      "id": "89cb0a1c-b99e-4cdb-8f73-dff9834139e1",
+      "name": "Step 10 Call‑option analyser"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\n\nreturn $input.all().map(item => {\n  const x = item.json;\n\n  const spot    = Number(x.spotPrice || 0);\n  const strike  = Number(x.strike    || 0);\n  const bid     = Number(x.bid       || 0);\n  const ask     = Number(x.ask       || 0);\n  const oi      = Number(x.openInterest || 0);\n  const volume  = Number(x.volume    || 0);\n  const iv      = Number(x.impliedVolatility || 0);\n  const premium = bid > 0 ? bid : ask;\n\n  const dte = x.expir\n    ? Math.ceil((new Date(x.expir) - now) / (1000 * 60 * 60 * 24))\n    : null;\n\n  const breakeven        = Number((spot - premium).toFixed(2));\n  const breakevenDropPct = Number((premium / spot * 100).toFixed(2));\n  const profitIfOTM_usd  = Number((premium * 100).toFixed(2));\n  const profitIfITM_usd  = Number(((strike - spot + premium) * 100).toFixed(2));\n  const maxLoss_usd      = Number(((spot - premium) * 100).toFixed(2));\n  const riskReward       = maxLoss_usd > 0 ? Number((profitIfITM_usd / maxLoss_usd).toFixed(4)) : null;\n  const liquidityScore   = Number((Math.min(oi / 500, 5) + Math.min(volume / 100, 5)).toFixed(2));\n  const spreadPct        = ask > 0 ? Number(((ask - bid) / ask * 100).toFixed(2)) : null;\n  const premiumYieldPct  = Number((premium / spot * 100).toFixed(4));\n\n  let qualityTag = \"SKIP\";\n  if (breakevenDropPct >= 2 && spreadPct !== null && spreadPct <= 30 && oi >= 50 && premiumYieldPct >= 0.5) qualityTag = \"GOOD\";\n  if (breakevenDropPct >= 3 && spreadPct !== null && spreadPct <= 20 && oi >= 100 && premiumYieldPct >= 1) qualityTag = \"STRONG\";\n\n  return {\n    json: {\n      // ── Identity ──────────────────────────────────\n      ticker:               x.ticker,\n      expiry:               x.expir,\n      daysToExpiry:         dte,\n      currentStockPrice:    spot,\n      strikePrice:          strike,\n\n      // ── Core metrics ──────────────────────────────\n      premiumReceived:      premium,\n      breakevenPrice:       breakeven,\n      stockCanDropBy:       `${breakevenDropPct}%`,\n\n      // ── Profit scenarios ──────────────────────────\n      profitIfStockStaysFlat:    `$${profitIfOTM_usd}`,\n      profitIfStockAboveStrike:   `$${profitIfITM_usd}`,\n      worstCaseLoss:             `$${maxLoss_usd}`,\n\n      // ── Risk ──────────────────────────────────────\n      rewardVsRisk:         riskReward,\n\n      // ── Liquidity ─────────────────────────────────\n      liquidityScore:       liquidityScore,\n      openInterest:         oi,\n      volume,\n\n      // ── Verdict ───────────────────────────────────\n      rating:               qualityTag,\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [896, 80],
+      "id": "e4a9e279-870a-4ba2-a98e-b042d68b7105",
+      "name": "Step 11 Covered‑call quality engine"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().filter(item => item.json.rating === \"STRONG\");"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, -96],
+      "id": "82783ee7-b85b-4be6-8f63-138a3d99ec59",
+      "name": "Step 13 Filter by strong rank"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().filter(item => item.json.rating === \"STRONG\");"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 80],
+      "id": "229a7419-9969-4267-88a0-54a8e1093d08",
+      "name": "Step 13 Filter by strong rank1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().filter(item => item.json.rating === \"STRONG\");"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 256],
+      "id": "cc977067-d845-421f-8609-c53c743997f9",
+      "name": "Step 13 Filter by strong rank2"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .map(item => {\n    const r = item.json;\n    const reward = Number(r.profitIfStockStaysFlat?.replace(\"$\", \"\") || 0) || 0;\n    const risk   = Number(r.worstCaseLoss?.replace(\"$\", \"\") || 0) || 0;\n    const ror    = risk > 0 ? reward / risk : 0;\n    return { ...r, reward, risk, rewardVsRisk: ror };\n  })\n  .sort((a, b) => b.rewardVsRisk - a.rewardVsRisk)\n  .slice(0, 10)\n  .map(row => ({ json: row }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, -96],
+      "id": "1c08fb06-ef31-4ae3-922a-ae5232d428de",
+      "name": "Step 14. Reward‑vs‑risk ranker"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .map(item => {\n    const r = item.json;\n    const reward = Number(r.profitIfStockStaysFlat?.replace(\"$\", \"\") || 0) || 0;\n    const risk   = Number(r.worstCaseLoss?.replace(\"$\", \"\") || 0) || 0;\n    const ror    = risk > 0 ? reward / risk : 0;\n    return { ...r, reward, risk, rewardVsRisk: ror };\n  })\n  .sort((a, b) => b.rewardVsRisk - a.rewardVsRisk)\n  .slice(0, 10)\n  .map(row => ({ json: row }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, 80],
+      "id": "6b35fb1b-11ee-41f0-886d-de7020319cb6",
+      "name": "Step 14. Reward‑vs‑risk ranker1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .map(item => {\n    const r = item.json;\n    const reward = Number(r.profitIfStockStaysFlat?.replace(\"$\", \"\") || 0) || 0;\n    const risk   = Number(r.worstCaseLoss?.replace(\"$\", \"\") || 0) || 0;\n    const ror    = risk > 0 ? reward / risk : 0;\n    return { ...r, reward, risk, rewardVsRisk: ror };\n  })\n  .sort((a, b) => b.rewardVsRisk - a.rewardVsRisk)\n  .slice(0, 10)\n  .map(row => ({ json: row }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, 256],
+      "id": "c61e0beb-0648-45f2-ae38-6a39fec88bae",
+      "name": "Step 14. Reward‑vs‑risk ranker2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst chatInput = JSON.stringify(items, null, 2);\nreturn [{ json: { chatInput } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1872, -96],
+      "id": "360d8584-0174-470c-9310-d65bd072f0dc",
+      "name": "Step 15. AI‑ready JSON packager"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst chatInput = JSON.stringify(items, null, 2);\nreturn [{ json: { chatInput } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1888, 80],
+      "id": "533ccc64-0cc1-44cf-8336-17efdfcf3625",
+      "name": "Step 15. AI‑ready JSON packager1"
+    },
+    {
+      "parameters": {
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a risk‑aware options trader.  1. For each ticker in the list below, search online and briefly summarize the last 3–5 days of news for that company. 2. Then, using that news plus the options data, choose the 3–4 safest short call options to sell from this list.  Rules: - Prefer higher liquidity: open interest ≥ 400, volume ≥ 20. - Prefer reward‑vs‑risk (ROR) between 0.10 and 0.13. - Prefer strikes close to current price. - Prefer days to expiry between 30 and 120. - If two options are very similar, prefer the one with higher open interest.  Input data (10 short call options): {{$json.chatInput}}  Output format: - \"Best 3–4 safest bets: (ticker, strike, expiry, rewardVsRisk)\" - For each chosen option:   - 1–2 sentences about the company news / sentiment.   - 1–2 sentences about why the option itself is safer. - One short risk summary of the whole portfolio."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [2080, -288],
+      "id": "05462c72-181a-4e18-83b3-e2397bd5448f",
+      "name": "LLM analysis",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a risk‑aware options trader.  1. For each ticker in the list below, search online and briefly summarize the last 3–5 days of news for that company. 2. Then, using that news plus the options data, choose the 3–4 safest short call options to sell from this list.  Rules: - Prefer higher liquidity: open interest ≥ 400, volume ≥ 20. - Prefer reward‑vs‑risk (ROR) between 0.10 and 0.13. - Prefer strikes close to current price. - Prefer days to expiry between 30 and 120. - If two options are very similar, prefer the one with higher open interest.  Input data (10 short call options): {{$json.chatInput}}  Output format: - \"Best 3–4 safest bets: (ticker, strike, expiry, rewardVsRisk)\" - For each chosen option:   - 1–2 sentences about the company news / sentiment.   - 1–2 sentences about why the option itself is safer. - One short risk summary of the whole portfolio."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [2080, 80],
+      "id": "9dd7e9b5-522f-44cc-8c61-bf62e6313e07",
+      "name": "LLM analysis1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a risk‑aware options trader.  1. For each ticker in the list below, search online and briefly summarize the last 3–5 days of news for that company. 2. Then, using that news plus the options data, choose the 3–4 safest short call options to sell from this list.  Rules: - Prefer higher liquidity: open interest ≥ 400, volume ≥ 20. - Prefer reward‑vs‑risk (ROR) between 0.10 and 0.13. - Prefer strikes close to current price. - Prefer days to expiry between 30 and 120. - If two options are very similar, prefer the one with higher open interest.  Input data (10 short call options): {{$json.chatInput}}  Output format: - \"Best 3–4 safest bets: (ticker, strike, expiry, rewardVsRisk)\" - For each chosen option:   - 1–2 sentences about the company news / sentiment.   - 1–2 sentences about why the option itself is safer. - One short risk summary of the whole portfolio."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [2080, 448],
+      "id": "b21ae12c-4fa7-4731-bec8-40c41713fe00",
+      "name": "LLM analysis2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const reasoning = $input.first().json.text || \"No reasoning provided.\";\n\nconst today = new Date().toISOString().split(\"T\")[0];\n\nreturn [{\n  json: {\n    subject: `📅 Daily Options Safety Report – ${today}`,\n    html: `\n      <h2 style=\"font-family: Arial, sans-serif; color:#111\">Daily Options Safety Report – ${today}</h2>\n\n      <p style=\"font-family: Arial, sans-serif; line-height:1.6\">\n        This is your daily safety review of the top STRONG‑rated short call options.\n      </p>\n\n      <h3 style=\"font-family: Arial, sans-serif; color:#333\">Best safest bets</h3>\n      <pre style=\"background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid #ddd; font-size:12px; line-height:1.4; font-family:monospace\">\n${reasoning}\n      </pre>\n\n      <footer style=\"margin-top:20px; color:#777; font-size:11px; font-family:Arial,sans-serif\">\n        This report is auto‑generated by your options‑scanning n8n workflow.\n      </footer>\n    `,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2384, -288],
+      "id": "7f3559cd-3c8b-44e9-9a08-1dda8b18324b",
+      "name": "Format AI output"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst chatInput = JSON.stringify(items, null, 2);\nreturn [{ json: { chatInput } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1888, 256],
+      "id": "5c1695d4-be98-4f98-a05c-107ea0e7e1d2",
+      "name": "Step 15. AI‑ready JSON packager2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const reasoning = $input.first().json.text || \"No reasoning provided.\";\n\nconst today = new Date().toISOString().split(\"T\")[0];\n\nreturn [{\n  json: {\n    subject: `📅 Daily Options Safety Report – ${today}`,\n    html: `\n      <h2 style=\"font-family: Arial, sans-serif; color:#111\">Daily Options Safety Report – ${today}</h2>\n\n      <p style=\"font-family: Arial, sans-serif; line-height:1.6\">\n        This is your daily safety review of the top STRONG‑rated short call options.\n      </p>\n\n      <h3 style=\"font-family: Arial, sans-serif; color:#333\">Best safest bets</h3>\n      <pre style=\"background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid #ddd; font-size:12px; line-height:1.4; font-family:monospace\">\n${reasoning}\n      </pre>\n\n      <footer style=\"margin-top:20px; color:#777; font-size:11px; font-family:Arial,sans-serif\">\n        This report is auto‑generated by your options‑scanning n8n workflow.\n      </footer>\n    `,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2384, 80],
+      "id": "6b7d82fc-2db9-41d6-98bf-ca86563bdb80",
+      "name": "Format AI output1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const reasoning = $input.first().json.text || \"No reasoning provided.\";\n\nconst today = new Date().toISOString().split(\"T\")[0];\n\nreturn [{\n  json: {\n    subject: `📅 Daily Options Safety Report – ${today}`,\n    html: `\n      <h2 style=\"font-family: Arial, sans-serif; color:#111\">Daily Options Safety Report – ${today}</h2>\n\n      <p style=\"font-family: Arial, sans-serif; line-height:1.6\">\n        This is your daily safety review of the top STRONG‑rated short call options.\n      </p>\n\n      <h3 style=\"font-family: Arial, sans-serif; color:#333\">Best safest bets</h3>\n      <pre style=\"background:#f9f9f9; padding:10px; border-radius:4px; border:1px solid #ddd; font-size:12px; line-height:1.4; font-family:monospace\">\n${reasoning}\n      </pre>\n\n      <footer style=\"margin-top:20px; color:#777; font-size:11px; font-family:Arial,sans-serif\">\n        This report is auto‑generated by your options‑scanning n8n workflow.\n      </footer>\n    `,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2384, 448],
+      "id": "e8be269d-cba9-49d9-820a-cf8200e0a2a1",
+      "name": "Format AI output2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Step 9 HTTP Request: Options‑chain API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "0-100 days expiry": {
+      "main": [
+        [
+          {
+            "node": "Step 13 Filter by strong rank",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "100-365 days of expiry": {
+      "main": [
+        [
+          {
+            "node": "Step 13 Filter by strong rank1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "365-900 days of expiry": {
+      "main": [
+        [
+          {
+            "node": "Step 13 Filter by strong rank2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Step 2 Extract from file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model Gemini 3.0": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1 gemini 3.1 lite": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM analysis1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2 gemini2.5 lite": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM analysis2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 2 Extract from file": {
+      "main": [
+        [
+          {
+            "node": "Step 3 Filter by Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 3 Filter by Price": {
+      "main": [
+        [
+          {
+            "node": "Step 5 HTTP Request : Detailed Option Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 5 HTTP Request : Detailed Option Metrics": {
+      "main": [
+        [
+          {
+            "node": "Select the top 10 ranked tickers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select the top 10 ranked tickers": {
+      "main": [
+        [
+          {
+            "node": "Final ticker string (packaging)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final ticker string (packaging)": {
+      "main": [
+        [
+          {
+            "node": "Final ticker preparing for next Api ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final ticker preparing for next Api ": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 9 HTTP Request: Options‑chain API": {
+      "main": [
+        [
+          {
+            "node": "Step 10 Call‑option analyser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 10 Call‑option analyser": {
+      "main": [
+        [
+          {
+            "node": "Step 11 Covered‑call quality engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 11 Covered‑call quality engine": {
+      "main": [
+        [
+          {
+            "node": "0-100 days expiry",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "100-365 days of expiry",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "365-900 days of expiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 13 Filter by strong rank": {
+      "main": [
+        [
+          {
+            "node": "Step 14. Reward‑vs‑risk ranker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 13 Filter by strong rank1": {
+      "main": [
+        [
+          {
+            "node": "Step 14. Reward‑vs‑risk ranker1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 13 Filter by strong rank2": {
+      "main": [
+        [
+          {
+            "node": "Step 14. Reward‑vs‑risk ranker2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 14. Reward‑vs‑risk ranker": {
+      "main": [
+        [
+          {
+            "node": "Step 15. AI‑ready JSON packager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 14. Reward‑vs‑risk ranker1": {
+      "main": [
+        [
+          {
+            "node": "Step 15. AI‑ready JSON packager1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 14. Reward‑vs‑risk ranker2": {
+      "main": [
+        [
+          {
+            "node": "Step 15. AI‑ready JSON packager2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 15. AI‑ready JSON packager": {
+      "main": [
+        [
+          {
+            "node": "LLM analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 15. AI‑ready JSON packager1": {
+      "main": [
+        [
+          {
+            "node": "LLM analysis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM analysis": {
+      "main": [
+        [
+          {
+            "node": "Format AI output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM analysis1": {
+      "main": [
+        [
+          {
+            "node": "Format AI output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM analysis2": {
+      "main": [
+        [
+          {
+            "node": "Format AI output2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI output": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Step 15. AI‑ready JSON packager2": {
+      "main": [
+        [
+          {
+            "node": "LLM analysis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI output1": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI output2": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "0e801b4f-097d-4d65-ba80-43bde25357ee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aae851201cf4c4bbe40d2ef683fbbae0f29563c534ec9cb85128cd25eb160c28"
+  },
+  "id": "OWMb45T05SFZUMxs",
+  "tags": []
+}
