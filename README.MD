@@ -8,7 +8,7 @@ Even if I tried to remove my credentials from the JSON file, it might not be 100
 
 What you should do:
 
-1. Import the JSON workflow into **your own n8n**.
+1. Import the JSON Options Analyzer.json workflow into **your own n8n**.
 2. **DO NOT** reuse my API keys, SMTP password, or any other credentials.
 3. Create **your own credentials** in n8n for:
    - SMTP / email
