@@ -397,3 +397,84 @@ In short:
 
 - You are using my **logic and structure**,
 - but **all API keys and passwords must be yours only**.
+
+## Here how the Email looks
+
+Daily Options Safety Report – 2026-05-09
+This is your daily safety review of the top STRONG‑rated short call options.
+
+Best safest bets
+
+### A. Summary Table
+
+| Rank | Ticker | Strike | Expiry     | ROR  | Score | Technicals | OTM Outcome  | ITM Outcome  |
+| ---- | ------ | ------ | ---------- | ---- | ----- | ---------- | ------------ | ------------ |
+| 1    | ASST   | 20.00  | 2026-06-18 | 5.9% | 8/10  | Strong     | +$0.88/share | +$4.96/share |
+| 2    | CNC    | 57.50  | 2026-06-18 | 4.1% | 7/10  | Strong     | +$2.21/share | +$3.75/share |
+| 3    | CMCSA  | 26.00  | 2026-07-17 | 3.8% | 7/10  | Strong     | +$0.94/share | +$1.54/share |
+| 4    | BLSH   | 45.00  | 2026-05-15 | 4.2% | 6/10  | Strong     | +$1.77/share | +$3.11/share |
+
+---
+
+### B. Analysis of Selected Trades
+
+#### 1. ASST (2026-06-18, $20 Strike)
+
+- **Context:** ASST maintains a "Strong" rating with positive momentum. 40 days to expiry provides a good balance for time decay (theta).
+- **Why safe:** Highest open interest (2140) ensures easier trade execution and liquidity. It offers the best reward-to-risk ratio among the group.
+- **Strategy: Covered Call on ASST**
+  - Expiration: 2026-06-18 (40 days)
+  - Strike Price: $20.00 (+25.6% from current)
+  - Capital Required: $1592 (100 shares)
+  - **Outcomes:**
+    - If Price >= $20: +31.15% USD (+$496)
+    - If Price < $20: +5.53% (+$88 premium kept)
+
+#### 2. CNC (2026-06-18, $57.50 Strike)
+
+- **Context:** Centene Corp (CNC) typically shows stable volatility in the healthcare managed care sector. "Strong" rating reflects institutional support.
+- **Why safe:** The 40-day window allows for a moderate premium collection while keeping the strike slightly OTM (approx 2.7% OTM), reducing the chance of being called away prematurely.
+- **Strategy: Covered Call on CNC**
+  - Expiration: 2026-06-18 (40 days)
+  - Strike Price: $57.50 (+2.7% from current)
+  - Capital Required: $5596 (100 shares)
+  - **Outcomes:**
+    - If Price >= $57.50: +6.70% USD (+$375)
+    - If Price < $57.50: +3.95% (+$221 premium kept)
+
+#### 3. CMCSA (2026-07-17, $26 Strike)
+
+- **Context:** Large-cap telecommunications/media player with consistent dividend history. High liquidity (score 5.86) makes this a conservative institutional favorite.
+- **Why safe:** Longer duration (69 days) and high volume (825) make it very stable for a "buy and hold" income approach.
+- **Strategy: Covered Call on CMCSA**
+  - Expiration: 2026-07-17 (69 days)
+  - Strike Price: $26.00 (+2.4% from current)
+  - Capital Required: $2540 (100 shares)
+  - **Outcomes:**
+    - If Price >= $26: +6.06% USD (+$154)
+    - If Price < $26: +3.70% (+$94 premium kept)
+
+#### 4. BLSH (2026-05-15, $45 Strike)
+
+- **Context:** Strong momentum profile; however, the short 6-day duration makes it a more tactical, shorter-term play than the others.
+- **Why safe:** High open interest (1439) provides a buffer, though the proximity of expiry requires closer monitoring for volatility spikes.
+- **Strategy: Covered Call on BLSH**
+  - Expiration: 2026-05-15 (6 days)
+  - Strike Price: $45.00 (+3.0% from current)
+  - Capital Required: $4366 (100 shares)
+  - **Outcomes:**
+    - If Price >= $45: +7.12% USD (+$311)
+    - If Price < $45: +4.05% (+$177 premium kept)
+
+---
+
+### C. Final Recommendations
+
+**Personal Judgment:** "If I were taking one trade, I would choose **CNC at the $57.50 strike (June expiry)** because it offers a balanced 40-day window with high institutional liquidity and a strike price that allows for capital appreciation without being overly aggressive."
+
+**Portfolio Risk Summary:**
+
+- **Upside:** Limited to the strike price plus premium received; optimal for sideways-to-mildly bullish markets.
+- **Downside:** Risk of stock price depreciation exceeding the premium buffer; breakeven levels are roughly 3-5% below current prices.
+- **Event Risk:** Earnings and dividends are "not found" in data, which is a risk factor; I suggest checking ex-dividend dates before placing these trades.
+- **Conservative/Aggressive:** The group is **conservative to moderate**, relying on established tickers with solid open interest to minimize tail risk.
